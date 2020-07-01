@@ -31,6 +31,11 @@ public abstract class DataRenderer extends Renderer {
     protected Paint mRenderPaint;
 
     /**
+     * stroke paint object used for rendering
+     */
+    protected Paint mStrokePaint;
+
+    /**
      * paint used for highlighting values
      */
     protected Paint mHighlightPaint;
@@ -49,6 +54,9 @@ public abstract class DataRenderer extends Renderer {
 
         mRenderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mRenderPaint.setStyle(Style.FILL);
+
+        mStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mStrokePaint.setStyle(Style.STROKE);
 
         mDrawPaint = new Paint(Paint.DITHER_FLAG);
 

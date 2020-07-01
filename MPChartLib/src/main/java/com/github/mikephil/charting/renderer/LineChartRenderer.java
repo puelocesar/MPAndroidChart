@@ -3,6 +3,7 @@ package com.github.mikephil.charting.renderer;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
@@ -812,49 +813,108 @@ public class LineChartRenderer extends LineRadarRenderer {
 
             for (int i = 0; i < colorCount; i++) {
 
+                float strokeWidth = circleRadius - circleHoleRadius;
+
                 Bitmap.Config conf = Bitmap.Config.ARGB_4444;
-                Bitmap circleBitmap = Bitmap.createBitmap((int) (circleRadius * 2.1), (int) (circleRadius * 2.1), conf);
+                Bitmap circleBitmap = Bitmap.createBitmap((int) (circleRadius * 2 + strokeWidth), (int) (circleRadius * 2 + strokeWidth), conf);
 
                 Canvas canvas = new Canvas(circleBitmap);
                 circleBitmaps[i] = circleBitmap;
                 mRenderPaint.setColor(set.getCircleColor(i));
+                mStrokePaint.setColor(set.getCircleColor(i));
+                mStrokePaint.setStrokeJoin(Paint.Join.MITER);
+                mStrokePaint.setStrokeWidth(strokeWidth/2);
 
-                if (drawTransparentCircleHole) {
-                    // Begin path for circle with hole
-                    mCirclePathBuffer.reset();
+                switch (set.getShapeType()) {
+                    case CIRCLE:
+                        drawCircle(circleRadius, circleHoleRadius, canvas, drawTransparentCircleHole, drawCircleHole);
+                        break;
+                    case SQUARE:
+                        drawSquare(circleRadius, circleHoleRadius, canvas, drawTransparentCircleHole, drawCircleHole);
+                        break;
+                    case TRIANGLE_INVERTED:
+                        drawPolygon(circleRadius, 3, canvas, drawTransparentCircleHole, drawCircleHole, true);
+                        break;
+                    case DIAMOND:
+                        drawPolygon(circleRadius, 4, canvas, drawTransparentCircleHole, drawCircleHole, false);
+                        break;
+                    case POLYGON:
+                        drawPolygon(circleRadius, 5, canvas, drawTransparentCircleHole, drawCircleHole, false);
+                        break;
+                }
+            }
+        }
 
-                    mCirclePathBuffer.addCircle(
-                            circleRadius,
-                            circleRadius,
-                            circleRadius,
-                            Path.Direction.CW);
+        private void drawCircle(float circleRadius, float circleHoleRadius, Canvas canvas, boolean drawTransparentCircleHole, boolean drawCircleHole) {
+            if (drawTransparentCircleHole) {
+                canvas.drawCircle(
+                        circleRadius,
+                        circleRadius,
+                        circleRadius,
+                        mStrokePaint);
+            } else {
+                canvas.drawCircle(
+                        circleRadius,
+                        circleRadius,
+                        circleRadius,
+                        mRenderPaint);
 
-                    // Cut hole in path
-                    mCirclePathBuffer.addCircle(
-                            circleRadius,
-                            circleRadius,
-                            circleHoleRadius,
-                            Path.Direction.CCW);
-
-                    // Fill in-between
-                    canvas.drawPath(mCirclePathBuffer, mRenderPaint);
-                } else {
-
+                if (drawCircleHole) {
                     canvas.drawCircle(
                             circleRadius,
                             circleRadius,
-                            circleRadius,
-                            mRenderPaint);
-
-                    if (drawCircleHole) {
-                        canvas.drawCircle(
-                                circleRadius,
-                                circleRadius,
-                                circleHoleRadius,
-                                mCirclePaintInner);
-                    }
+                            circleHoleRadius,
+                            mCirclePaintInner);
                 }
             }
+        }
+
+        private void drawSquare(float circleRadius, float circleHoleRadius, Canvas canvas, boolean drawTransparentCircleHole, boolean drawCircleHole) {
+            if (drawTransparentCircleHole) {
+                canvas.drawRect(
+                        0f,
+                        0f,
+                        circleRadius * 2,
+                        circleRadius * 2,
+                        mStrokePaint);
+            } else {
+                canvas.drawRect(
+                        0f,
+                        0f,
+                        circleRadius * 2,
+                        circleRadius * 2,
+                        mRenderPaint);
+
+                if (drawCircleHole) {
+                    float padding = circleRadius - circleHoleRadius;
+                    canvas.drawRect(
+                            padding,
+                            padding,
+                            circleRadius * 2 - padding,
+                            circleRadius * 2 - padding,
+                            mCirclePaintInner);
+                }
+            }
+        }
+
+        private void drawPolygon(float radius, int sides, Canvas canvas, boolean drawTransparentCircleHole, boolean drawCircleHole, boolean inverted) {
+            Path path = new Path();
+            path.moveTo(radius, inverted ? radius * 2 : 0);
+            double startAngle = inverted ? 0 : Math.PI;
+            double increment = (2 * Math.PI) / sides;
+
+            for (int i=1; i<=sides; i++) {
+                double angle = startAngle + i * increment;
+                path.lineTo(
+                        (float) (radius + Math.sin(angle) * radius),
+                        (float) (radius + Math.cos(angle) * radius)
+                );
+            }
+
+            if (!drawTransparentCircleHole) {
+                canvas.drawPath(path, drawCircleHole ? mCirclePaintInner : mRenderPaint);
+            }
+            canvas.drawPath(path, mStrokePaint);
         }
 
         /**

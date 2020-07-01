@@ -19,6 +19,13 @@ public interface ILineDataSet extends ILineRadarDataSet<Entry> {
     LineDataSet.Mode getMode();
 
     /**
+     * Returns the marker shape for this line dataset
+     *
+     * @return
+     */
+    LineDataSet.ShapeType getShapeType();
+
+    /**
      * Returns the intensity of the cubic lines (the effect intensity).
      * Max = 1f = very cubic, Min = 0.05f = low cubic effect, Default: 0.2f
      *

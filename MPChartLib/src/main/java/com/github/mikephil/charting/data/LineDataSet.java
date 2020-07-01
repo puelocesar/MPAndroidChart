@@ -23,6 +23,11 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
     private LineDataSet.Mode mMode = Mode.LINEAR;
 
     /**
+     * The marker shape for this line dataset
+     **/
+    private LineDataSet.ShapeType mShapeType = ShapeType.CIRCLE;
+
+    /**
      * List representing all colors that are used for the circles
      */
     private List<Integer> mCircleColors = null;
@@ -105,6 +110,7 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
         lineDataSet.mDrawCircles = mDrawCircleHole;
         lineDataSet.mFillFormatter = mFillFormatter;
         lineDataSet.mMode = mMode;
+        lineDataSet.mShapeType = mShapeType;
     }
 
     /**
@@ -124,6 +130,25 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
      */
     public void setMode(LineDataSet.Mode mode) {
         mMode = mode;
+    }
+
+    /**
+     * Returns the marker shape for this line dataset
+     *
+     * @return
+     */
+    @Override
+    public LineDataSet.ShapeType getShapeType() {
+        return mShapeType;
+    }
+
+    /**
+     * Returns the marker shape for this LineDataSet
+     *
+     * @return
+     */
+    public void setShapeType(LineDataSet.ShapeType shapeType) {
+        mShapeType = shapeType;
     }
 
     /**
@@ -413,5 +438,13 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
         STEPPED,
         CUBIC_BEZIER,
         HORIZONTAL_BEZIER
+    }
+
+    public enum ShapeType {
+        CIRCLE,
+        TRIANGLE_INVERTED,
+        SQUARE,
+        DIAMOND,
+        POLYGON
     }
 }
